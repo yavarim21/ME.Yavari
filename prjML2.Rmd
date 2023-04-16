@@ -1,0 +1,812 @@
+---
+title: "ProjectML"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+pkg_list <- c("tidyverse","MASS", "ISLR","ISLR2", "dplyr", "caret","ModelMetrics",
+"ggplot2", "corrplot","class","glmnet","pls","pscl","pROC","neuralnet","tree")
+# Install packages if needed
+for (pkg in pkg_list)
+{
+# Try loading the library.
+if ( ! library(pkg, logical.return=TRUE, character.only=TRUE) )
+{
+# If the library cannot be loaded, install it; then load.
+install.packages(pkg)
+library(pkg, character.only=TRUE)
+}
+}
+```
+
+## R Markdown
+```{r}
+setwd("C:/Users/NP/Documents/archive (3)")
+ktd <- read.csv("kdd3.csv",header = TRUE )
+
+
+#ktd<-na.omit(ktd)
+#ktd
+nrow(ktd)
+
+#ktd = drop_na(ktd)
+ktd<-na.omit(ktd)
+
+
+#dataset for neural network
+kdn<-ktd
+
+nrow(ktd)
+
+
+
+#ktd[25] <- ifelse(ktd$classification == "ckd", 1, 0)
+
+ggplot(ktd, aes(x=classification)) + geom_bar(fill = "#FF6666")+
+theme(text = element_text(size = 12))
+
+ggplot(ktd, aes(x=al)) + geom_bar(fill = "#FF6666")+
+theme(text = element_text(size = 12))
+
+
+ggplot(ktd, aes(x=su)) + geom_bar(fill = "#FF6666")+
+theme(text = element_text(size = 12))
+
+ggplot(ktd, aes(x=rbc)) + geom_bar(fill = "#FF6666")+
+theme(text = element_text(size = 12))
+
+ggplot(ktd, aes(x=pc)) + geom_bar(fill = "#FF6666")+
+theme(text = element_text(size = 12))
+
+ggplot(ktd, aes(x=pcc)) + geom_bar(fill = "#FF6666")+
+theme(text = element_text(size = 12))
+
+#ggplot(ktd, aes(x=pcv)) + geom_bar(fill = "#FF6666")+
+#theme(text = element_text(size = 12))
+#ggplot(ktd, aes(x=wc)) + geom_bar(fill = "#FF6666")+
+#theme(text = element_text(size = 12))
+
+```
+
+```{r}
+
+# Install and load reshape2 package
+
+ggplot(ktd,aes(x=classification, y=age, fill=classification )) +
+geom_boxplot() +
+ggtitle("Kidney disease based on age")+
+theme(text = element_text(size = 14))+
+scale_fill_brewer(palette="Set1")
+
+```
+
+```{r}
+ggplot(ktd,aes(x=classification, y=bp, fill=classification )) +
+geom_boxplot() +
+ggtitle("Kidney disease based on bp")+
+theme(text = element_text(size = 14))+
+scale_fill_brewer(palette="Set1")
+
+```
+```{r}
+ggplot(ktd,aes(x=classification, y=sg, fill=classification )) +
+geom_boxplot() +
+ggtitle("Kidney disease based on age")+
+theme(text = element_text(size = 14))+
+scale_fill_brewer(palette="Set1")
+```
+```{r}
+ggplot(ktd,aes(x=classification, y=al, fill=classification )) +
+geom_boxplot() +
+ggtitle("Kidney disease based on al")+
+theme(text = element_text(size = 14))+
+scale_fill_brewer(palette="Set1")
+```
+```{r}
+ggplot(ktd,aes(x=classification, y=bgr, fill=classification )) +
+geom_boxplot() +
+ggtitle("Kidney disease based on bgr")+
+theme(text = element_text(size = 14))+
+scale_fill_brewer(palette="Set1")
+```
+
+```{r}
+ggplot(ktd,aes(x=classification, y=bu, fill=classification )) +
+geom_boxplot() +
+ggtitle("Kidney disease based on age")+
+theme(text = element_text(size = 14))+
+scale_fill_brewer(palette="Set1")
+```
+```{r}
+ggplot(ktd,aes(x=classification, y=sc, fill=classification )) +
+geom_boxplot() +
+ggtitle("Kidney disease based on sc")+
+theme(text = element_text(size = 14))+
+scale_fill_brewer(palette="Set1")
+```
+```{r}
+ggplot(ktd,aes(x=classification, y=sod, fill=classification )) +
+geom_boxplot() +
+ggtitle("Kidney disease based on sod")+
+theme(text = element_text(size = 14))+
+scale_fill_brewer(palette="Set1")
+```
+
+```{r}
+u1<-ggplot(ktd,aes(x=classification, y=pot, fill=classification )) +
+geom_boxplot() +
+ggtitle("Kidney disease based on pot")+
+theme(text = element_text(size = 14))+
+scale_fill_brewer(palette="Set1")
+
+
+ggplot(ktd,aes(x=classification, y=hemo, fill=classification )) +
+geom_boxplot() +
+ggtitle("Kidney disease based on hemo")+
+theme(text = element_text(size = 14))+
+scale_fill_brewer(palette="Set1")
+
+
+u3<-ggplot(ktd,aes(x=classification, y=pcv, fill=classification )) +
+geom_boxplot() +
+ggtitle("Kidney disease based on pcv")+
+theme(text = element_text(size = 12))+
+scale_fill_brewer(palette="Set1")
+
+
+u4<-ggplot(ktd,aes(x=classification, y=wc, fill=classification )) +
+geom_boxplot() +
+ggtitle("Kidney disease based on wc")+
+theme(text = element_text(size = 12))+
+scale_fill_brewer(palette="Set1")
+
+
+ggplot(data = ktd, aes(x = wc))+geom_histogram()
+
+
+```
+
+```{r}
+ ggplot(data = ktd, aes(y= wc))+
+  geom_boxplot(outlier.color = "#FF6666", fill = "#FF6666")
+
+
+ggplot(data = ktd, aes(y= pcv))+
+  geom_boxplot(outlier.color = "#FF6666", fill = "#FF6666")
+
+#ktd[18]<-scale(ktd$rc)
+
+ggplot(data = ktd, aes(y= rc))+
+  geom_boxplot(outlier.color = "#FF6666", fill = "#FF6666")
+
+ggplot(data = ktd, aes(y= bp))+
+  geom_boxplot(outlier.color = "#FF6666", fill = "#FF6666")
+
+
+ggplot(data = ktd, aes(y= sg))+
+  geom_boxplot(outlier.color = "#FF6666", fill = "#FF6666")
+
+ggplot(data = ktd, aes(y= bgr))+
+  geom_boxplot(outlier.color = "#FF6666", fill = "#FF6666")
+
+ggplot(data = ktd, aes(y= bu))+
+  geom_boxplot(outlier.color = "#FF6666", fill = "#FF6666")
+ggplot(data = ktd, aes(y= sc))+
+  geom_boxplot(outlier.color = "#FF6666", fill = "#FF6666")
+ggplot(data = ktd, aes(y= sod))+
+  geom_boxplot(outlier.color = "#FF6666", fill = "#FF6666")
+ggplot(data = ktd, aes(y= pot))+
+  geom_boxplot(outlier.color = "#FF6666", fill = "#FF6666")
+
+ggplot(data = ktd, aes(y= hemo))+
+  geom_boxplot(outlier.color = "#FF6666", fill = "#FF6666")
+
+
+#view(ktd)
+
+```
+```{r}
+
+Q1 <- quantile(ktd$wc, .25)
+Q3 <- quantile(ktd$wc, .75)
+IQR <- IQR(ktd$wc)
+
+
+ # Lower bound Quantile Range:
+    l = Q1-1.5*IQR
+    # Upper bound Quantile Range:
+    u = Q3+1.5*IQR
+#lower    
+    l
+    
+    #upper
+    u
+```
+
+
+```{r}
+#find Q1, Q3, and interquartile range for values in column A
+Q1 <- quantile(ktd$bgr, .25)
+Q3 <- quantile(ktd$bgr, .75)
+IQR <- IQR(ktd$bgr)
+
+
+ # Lower bound Quantile Range:
+    l = Q1-1.5*IQR
+    # Upper bound Quantile Range:
+    u = Q3+1.5*IQR
+#lower    
+    l
+    
+    #upper
+    u
+```
+
+
+```{r}
+```
+
+
+```{r}
+#only keep rows in dataframe that have values within 1.5*IQR of Q1 and Q3
+#no_outliers <- subset(ktd, ktd$bgr> (Q1 - 1.5*IQR) & ktd$bgr< (Q3 + 1.5*IQR))
+
+#view row and column count of new data frame
+#dim(no_outliers) 
+Q1 <- quantile(ktd$pcv, .25)
+Q3 <- quantile(ktd$pcv, .75)
+IQR <- IQR(ktd$pcv)
+
+
+ # Lower bound Quantile Range:
+    l = Q1-1.5*IQR
+    # Upper bound Quantile Range:
+    u = Q3+1.5*IQR
+#lower    
+    l
+    
+    #upper
+    u
+```
+
+
+```{r}
+
+Q1 <- quantile(ktd$bu, .25)
+Q3 <- quantile(ktd$bu, .75)
+IQR <- IQR(ktd$bu)
+
+
+ # Lower bound Quantile Range:
+    l = Q1-1.5*IQR
+    # Upper bound Quantile Range:
+    u = Q3+1.5*IQR
+#lower    
+    l
+    
+    #upper
+    u
+```
+
+
+```{r}
+Q1 <- quantile(ktd$bp, .25)
+Q3 <- quantile(ktd$bp, .75)
+IQR <- IQR(ktd$bp)
+
+
+ # Lower bound Quantile Range:
+    l = Q1-1.5*IQR
+    # Upper bound Quantile Range:
+    u = Q3+1.5*IQR
+#lower    
+    l
+    
+    #upper
+    u
+```
+
+
+```{r}
+```
+
+
+```{r}
+Q1 <- quantile(ktd$sc, .25)
+Q3 <- quantile(ktd$sc, .75)
+IQR <- IQR(ktd$sc)
+
+
+ # Lower bound Quantile Range:
+    l = Q1-1.5*IQR
+    # Upper bound Quantile Range:
+    u = Q3+1.5*IQR
+#lower    
+    l
+    
+    #upper
+    u
+```
+
+
+```{r}
+```
+
+
+```{r}
+Q1 <- quantile(ktd$pot, .25)
+Q3 <- quantile(ktd$pot, .75)
+IQR <- IQR(ktd$pot)
+
+
+ # Lower bound Quantile Range:
+    l = Q1-1.5*IQR
+    # Upper bound Quantile Range:
+    u = Q3+1.5*IQR
+#lower    
+    l
+    
+    #upper
+    u
+```
+
+
+```{r}
+```
+
+
+```{r}
+Q1 <- quantile(ktd$hemo, .25)
+Q3 <- quantile(ktd$hemo, .75)
+IQR <- IQR(ktd$hemo)
+
+
+ # Lower bound Quantile Range:
+    l = Q1-1.5*IQR
+    # Upper bound Quantile Range:
+    u = Q3+1.5*IQR
+#lower    
+    l
+    
+    #upper
+    u
+```
+
+
+```{r}
+```
+
+
+```{r}
+Q1 <- quantile(ktd$al, .25)
+Q3 <- quantile(ktd$al, .75)
+IQR <- IQR(ktd$al)
+
+
+ # Lower bound Quantile Range:
+    l = Q1-1.5*IQR
+    # Upper bound Quantile Range:
+    u = Q3+1.5*IQR
+#lower    
+    l
+    
+    #upper
+    u
+```
+
+
+```{r}
+
+```
+```{r}
+ggplot(data = ktd, aes(y= al))+
+  geom_boxplot(outlier.color = "#FF6666", fill = "#FF6666")
+```
+
+```{r}
+
+
+
+
+
+#ktd[25] <- ifelse(ktd$classification == "ckd", 1, 0)
+
+```
+
+
+
+```{r}
+set.seed(123)
+training.samples <- ktd$classification %>%createDataPartition(p = 0.75, list = FALSE)
+data.train <- ktd[training.samples, ]
+data.test<- ktd[-training.samples, ]
+
+#view(data.test)
+
+nrow(ktd)
+
+```
+
+```{r}
+
+
+
+
+
+
+# Create the matrix of predictors for glmnet function
+x <- model.matrix(classification~., data.train)[,-24]
+
+# Convert the outcome (class) to a numerical variable
+
+
+y<-data.train[25] <- ifelse(data.train$classification == "ckd", 1, 0)
+
+
+
+
+
+
+```
+```{r}
+summary(data.train)
+
+```
+```{r}
+
+
+
+```
+
+```{r}
+
+```
+
+
+
+```{r}
+u0 <- ggplot(data = data.train, aes(y=bp ))+
+  geom_boxplot(outlier.color = "#FF6666", fill = "#1CA160")
+u0
+u1 <- ggplot(data = data.train, aes(y=sg ))+
+  geom_boxplot(outlier.color = "#FF6666", fill = "#1CA160")
+u1
+u2 <- ggplot(data = data.train, aes(y=al ))+
+  geom_boxplot(outlier.color = "#FF6666", fill = "#1CA160")
+
+u2
+
+u3 <- ggplot(data = data.train, aes(y=bp ))+
+  geom_boxplot(outlier.color = "#FF6666", fill = "#1CA160")
+
+
+```
+```{r}
+
+
+
+```
+
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r}
+#sapply(data.train, function(x) sum(is.na(x)))
+#data.train<-na.omit(data.train)
+sapply(ktd, function(x) sum(is.na(x)))
+
+
+#apply(data,2,function(x) sum(is.na(x)))
+```
+```{r}
+
+#glm(factor(data$B) ~ value,family="binomial", data = .)
+
+#fullmodel <- glm(classification ~ . , data = data.train, family= "gaussian")
+
+
+fullmodel <- glm( classification ~ ., data = data.train,family = gaussian)
+
+summary(fullmodel)
+
+
+```
+
+
+
+
+
+```{r}
+
+
+
+
+
+```
+
+
+```{r}
+probabilities <- fullmodel %>% predict(data.test, type = "response")
+# Model accuracy
+predicted.classes <- ifelse(probabilities > 0.5, "ckd", "notckd")
+#predicted.classes
+observed.classes <- data.test$classification
+#observed.classes
+mean(predicted.classes == observed.classes)
+
+```
+
+```{r}
+#x <- model.matrix(classification~., data.train)[,-26]
+
+
+
+
+set.seed(1234)
+cv.lasso <- cv.glmnet(x, y, alpha = 1, family = "binomial", lambda = NULL)
+cv.lasso$lambda.min
+
+```
+```{r}
+model <- glmnet(x, y, alpha = 1, family = "binomial",lambda = cv.lasso$lambda.min)
+# Display regression coefficients
+coef(model)
+```
+```{r}
+probabilities <- model %>% predict(data.test, type = "response")
+
+# Model accuracy
+predicted.classes <- ifelse(probabilities > 0.5, "ckd", "notckd")
+#predicted.classes
+observed.classes <- data.test$classification
+#observed.classes
+mean(predicted.classes == observed.classes)
+
+
+
+
+```
+
+
+```{r}
+
+set.seed(123)
+cv_10 = trainControl(method = "cv", number = 10)
+# Train the model
+
+
+elasticm <- train(as.factor(classification) ~ .,
+             method     = "glmnet",
+            
+             trControl  = cv_10,
+            
+             data= data.train,
+            # family= binomial()
+            tuneLength=10
+             
+            )
+
+elasticm$bestTune
+coef(elmodel$finalModel, elmodel$bestTune$lambda)
+
+```
+```{r}
+bemodel <- glmnet(x, y, alpha = 0.1, lambda = 0.0120223	,family="binomial")
+coef(bemodel)
+
+```
+
+
+
+
+```{r}
+# Make predictions
+probabilities <- bemodel %>% predict(data.test, type = "response")
+
+# Model accuracy
+predicted.classes <- ifelse(probabilities > 0.5, "ckd", "notckd")
+#predicted.classes
+observed.classes <- data.test$classification
+#observed.classes
+mean(predicted.classes == observed.classes)
+
+```
+```{r}
+ktd[12]<-scale(ktd$sc)
+
+ktd[17]<-scale(ktd$wc)
+
+
+
+ktd[11]<-scale(ktd$bu)
+
+
+ktd[10]<-scale(ktd$bgr)
+
+ktd[2]<-scale(ktd$bp)
+
+ktd[18]<-scale(ktd$rc)
+```
+
+```{r}
+ktd[25] <- ifelse(ktd$classification == "ckd", 1, 0)
+
+
+set.seed(1)
+train = sample(1:nrow(ktd), nrow(ktd)/2)
+
+#view(train)
+# Fit decision tree
+tree.k=tree(classification~.,ktd,subset=train)
+summary(tree.k)
+
+
+```
+```{r}
+plot(tree.k)
+text(tree.k,pretty=0)
+```
+
+```{r}
+
+setwd("C:/Users/NP/Documents/archive (3)")
+kdn <- read.csv("kd-cor-el.csv",header = TRUE )
+
+
+#ktd<-na.omit(ktd)
+#ktd
+#nrow(ktd)
+
+#ktd = drop_na(ktd)
+kdn<-na.omit(ktd)
+#view(ktd)
+
+
+```
+
+
+
+```{r}
+kdn[9]<- ifelse(kdn$ba == "notpresent", 1, 0)
+kdn[19]<- ifelse(kdn$dm == "yes", 1, 0)
+#kdn[21] <- ifelse(kdn$cad == "yes", 1, 0)
+
+kdn[6] <- ifelse(kdn$rbc == "normal", 1, 0)
+kdn[7] <- ifelse(kdn$pc == "normal", 0, 1) ##################changes
+
+kdn[8] <- ifelse(kdn$pcc == "present", 1, 0)
+
+#kdn[22] <- ifelse(kdn$appet == "good", 1, 0)
+#kdn[23] <- ifelse(kdn$pe== "yes", 1, 0)
+kdn[20] <- ifelse(kdn$ane == "yes", 1, 0)
+kdn[18] <- ifelse(kdn$htn == "yes", 0, 1) ################################change
+
+
+kdn[21] <- ifelse(kdn$classification == "ckd", 1, 0)
+view(kdn)
+
+# Scaling data for the NN
+maxs <- apply(kdn, 2, max)
+mins <- apply(kdn, 2, min)
+scaled <- as.data.frame(scale(kdn, center = mins, scale = maxs - mins))
+#view(scaled)
+# Train-test split
+train_ <- scaled[184,]
+
+test_ <- scaled[-184,]
+
+
+
+
+```
+```{r}
+view(test_)
+```
+
+
+```{r}
+set.seed(123)
+
+#wheights <- c(0,0.019953,-197.73,16.707,0,0,1.9877,0,0,0.027413,0,0,0,0,-0.63702,-0.19808,-0.00027469,-0.38178,-1.2052,32.4013,0,0,0,0)
+
+#wheights <- c(0,0.02,-198,17,0,0,2,0,0,0.03,0,0,0,0,-0.63702,-0.2,0.0003,-0.4,-1.2052,32.4013,0,0,0,0)
+
+#wheights <- c(0.012,0,023,-74,0.28,0.191,0.6,-1.47,0.81,-0.51,-0.16,0.4,0.18,0.11,0.0085,0.005,0.24,-0.27,-0.12,-0.14,-0.042,-0.00042,32.4013,0,0,0,0)
+
+library(neuralnet) # library to fit neural network
+# To know more use **?neuralnet**s
+n <- names(train_)
+f <- as.formula(paste("classification ~", paste(n[!n %in% "classification"], collapse = " + ")))
+nn <- neuralnet(f,data=train_,hidden=c(8,8), act.fct = "logistic", linear.output=T)
+plot(nn)
+
+
+```
+```{r}
+
+nn$result.matrix
+```
+
+
+```{r}
+
+
+```
+
+
+```{r}
+
+
+
+```
+
+
+```{r}
+#data.test$classification
+
+#Test the resulting output
+#temp_test <- subset(testset, select = c("fcfps","earnings_growth", "de", "mcap", "current_ratio"))
+#head(temp_test)
+#nn.results <- compute(nn, temp_test)
+nn.results <- compute(nn,test_[,1:21])
+
+results <- data.frame(actual = test_$classification, prediction = nn.results$net.result)
+
+results
+```
+```{r}
+roundedresults<-sapply(results,round,digits=0)
+roundedresultsdf=data.frame(roundedresults)
+attach(roundedresultsdf)
+table(actual,prediction)
+```
+```{r}
+
+#84 percetnt ACCuracey   123+45 divide over 203
+detach(package:neuralnet,unload = T)
+#dplyr::select(neuralnet)
+
+pr<-nn.results$net.result
+pr<-abs(pr)
+
+
+#library(ROCR)
+nn.pred = prediction(pr, test_$classification)
+
+pref <- performance(nn.pred, "tpr", "fpr")
+
+
+pref2 <- performance(nn.pred, "prec", "rec")
+plot(pref,colorize=T)
+plot(pref2,colorize=T)
+
+```
+```{r}
+
+auc(test_$classification, pr)
+
+roc_score = roc(test_[, 21], pr)  # AUC score
+roc_score
+plot(roc_score,col="blue", main="ROC curve ")
+
+
+```
+
+
+
+```{r}
+Result<-confusionMatrix(test_$classification, pr)
+Result
+
+```
+
+```{r}
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
